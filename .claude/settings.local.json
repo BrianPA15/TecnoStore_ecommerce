@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\xampp\\\\htdocs\\\\wp-content\\\\themes\\\\tecnostore\" -Recurse -File | Select-Object @{N='Path';E={$_.FullName.Replace\\('C:\\\\xampp\\\\htdocs\\\\wp-content\\\\themes\\\\tecnostore\\\\',''\\)}} | Sort-Object Path)"
+    ]
+  }
+}
