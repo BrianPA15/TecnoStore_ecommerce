@@ -40,8 +40,8 @@ jobs:
         DB_HOST: 127.0.0.1
         STORE_JWT_TOKEN: ${{ secrets.STORE_JWT_TOKEN }} 
       run: |
-        # Ejecuta phpunit apuntando a tu fichero exacto de seguridad
-        phpunit test/test-ecommerce-security.php
+        # Le indicamos a phpunit que cargue obligatoriamente el bootstrap de wordpress-develop
+        phpunit --bootstrap /tmp/wordpress-develop/tests/phpunit/includes/bootstrap.php test/test-ecommerce-security.php
 
 
 
