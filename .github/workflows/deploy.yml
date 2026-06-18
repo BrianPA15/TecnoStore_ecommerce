@@ -1,0 +1,91 @@
+name: CI Tienda WordPress
+
+on: [push, pull_request]
+
+jobs:
+  wordpress-tests:
+    name: Tests Unitarios del Tema TecnoStore
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+
+    steps:
+    - name: Clonar el Repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar Entorno PHP y WP-CLI
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.0'
+        extensions: mysqli, curl, mbstring, openssl
+        tools: wp-cli, phpunit
+
+    - name: Setup WordPress Develop Tests Suite
+      run: |
+        git clone --depth=1 https://github.com/WordPress/wordpress-develop.git /tmp/wordpress-develop
+
+    - name: Execute Tests
+      env:
+        WP_TESTS_DIR: /tmp/wordpress-develop/tests/phpunit
+        DB_NAME: wordpress_test
+        DB_USER: root
+        DB_PASS: ''
+        DB_HOST: 127.0.0.1
+        STORE_JWT_TOKEN: ${{ secrets.STORE_JWT_TOKEN }} 
+      run: |
+        # Ejecuta phpunit apuntando a tu fichero exacto de seguridad
+        phpunit test/test-ecommerce-security.php
+
+
+
+# name: CI Ecommerce WordPress
+
+# on: [push, pull_request]
+
+# jobs:
+#   wordpress-tests:
+#     name: Suite WordPress Testing (PHPUnit)
+#     runs-on: ubuntu-latest
+    
+#     services:
+#       mysql:
+#         image: mysql:5.7
+#         env:
+#           MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+#           MYSQL_DATABASE: wordpress_test
+#         ports:
+#           - 3306:3306
+
+#     steps:
+#     - name: Clonar el Repositorio
+#       uses: actions/checkout@v4
+
+#     - name: Configurar Entorno PHP y WP-CLI
+#       uses: shivammathur/setup-php@v2
+#       with:
+#         php-version: '7.0'
+#         extensions: mysqli, curl, mbstring, openssl
+#         tools: wp-cli, phpunit
+
+#     - name: Descargar Wordpress Develop Test Suite
+#       run: |
+#         git clone --depth=1 https://github.com/WordPress/wordpress-develop.git /tmp/wordpress-develop
+
+#     - name: Ejecutar Suite de Tests Unitarios
+#       env:
+#         WP_TESTS_DIR: /tmp/wordpress-develop/tests/phpunit
+#         DB_NAME: wordpress_test
+#         DB_USER: root
+#         DB_PASS: ''
+#         DB_HOST: 127.0.0.1
+#         STORE_JWT_TOKEN: ${{ secrets.STORE_JWT_TOKEN }}
+#       run: |
+#         # Si usas el archivo phpunit que os dio el profesor, cámbialo por ./phpunit o la ruta donde esté
+#         phpunit tests/test-ecommerce-security.php
