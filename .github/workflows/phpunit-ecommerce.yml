@@ -1,0 +1,38 @@
+name: CI Tienda WordPress
+
+on: [push, pull_request]
+
+jobs:
+  wordpress-tests:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7 # Versión recomendada para el entorno WordPress antiguo de tu proyecto
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.0' # Versión explícita requerida en tu README
+        extensions: mysqli, curl, mbstring, openssl
+        tools: composer, wp-cli
+    - name: Install dependencies
+      run: composer install --dev || true
+    - name: Setup WordPress Develop Tests Suite
+      run: |
+        git clone --depth=1 https://github.com/WordPress/wordpress-develop.git /tmp/wordpress-develop
+    - name: Execute Tests
+      env:
+        WP_TESTS_DIR: /tmp/wordpress-develop/tests/phpunit
+        DB_NAME: tecnostore
+        DB_USER: root
+        DB_PASS: ''
+        DB_HOST: 127.0.0.1
+        # Inyección segura del token desde los secretos de GitHub
+        STORE_JWT_TOKEN: ${{ secrets.STORE_JWT_TOKEN }} 
+      run: ./vendor/bin/phpunit tests/test-ecommerce-security.php
